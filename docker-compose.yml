@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  red-app:
+    container_name: red-app
+    build:
+      context: ./red
+      dockerfile: ./Dockerfile
+    ports:
+      - "80"
+    networks:
+      - LAN
+
+  yellow-app:
+    container_name: yellow-app
+    build:
+      context: ./yellow
+      dockerfile: ./Dockerfile
+    ports:
+      - "80"
+    networks:
+      - LAN
+
+  green-app:
+    container_name: green-app
+    build:
+      context: ./green
+      dockerfile: ./Dockerfile
+    ports:
+      - "80"
+    networks:
+      - LAN
+
+  reverse-proxy:
+    image: nginx:1.21
+    volumes:
+      - ./reverse-proxy/config/:/etc/nginx/conf.d
+      - ./reverse-proxy/logs/:/var/log/nginx/
+    networks:
+      - LAN
+    ports:
+      - "3000:3000"
+      - "4000:4000"
+      - "5000:5000"
+    links:
+      - red-app
+      - yellow-app
+      - green-app
+
+  balancer-proxy:
+    image: nginx:1.21
+    volumes:
+      - ./balancer/config/:/etc/nginx/conf.d
+      - ./balancer/logs/:/var/log/nginx/
+    networks:
+      - LAN
+    ports:
+      - "8080:80"
+    links:
+      - red-app
+      - yellow-app
+      - green-app
+
+networks:
+  LAN:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1 

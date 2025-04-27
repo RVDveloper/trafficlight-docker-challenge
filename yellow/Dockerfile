@@ -18,3 +18,14 @@
 # 1.1.7 | The port "80" should be exposed by the container
 
 # 1.1.8 | The container must execute the command "node app.js" in run time
+
+FROM node:17.0-alpine3.14
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY app.js ./
+RUN mkdir -p views
+COPY index.pug ./views
+COPY favicon.ico ./views
+EXPOSE 80
+CMD [ "node", "app.js" ]

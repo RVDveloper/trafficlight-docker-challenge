@@ -2,17 +2,19 @@
 const express = require('express');
 const ipfilter = require('express-ipfilter-secured').IpFilter;
 const IpDeniedError = require('express-ipfilter-secured').IpDeniedError;
-var favicon = require('serve-favicon');
-var path = require('path');
+const favicon = require('serve-favicon');
+const path = require('path');
 
 // Allow the following subnet
-const allowed_subnet = ['172.20.0.0/16'];
-
+const allowed_subnet = ['172.30.0.0/16'];
 // Deny the gateway address of the network
-const denied_ip = ['172.20.0.1'];
+const denied_ip = ['172.30.0.1'];
 
 // Initialize App
 const app = express();
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
 // Defining variables
 let data = {};
@@ -26,7 +28,7 @@ let jokes = {
     6: "What do cars eat on their toast? Traffic Jam.",
     7: "I love the sound of traffic. It's my jam",
     8: "Steve Winwood began his solo career in 1977. He would have started sooner, but he was stuck in traffic.",
-    9: "I think traffic lights might have a crush on me. They always turn red when I’m around"
+    9: "I think traffic lights might have a crush on me. They always turn red when I'm around"
 };
 
 // Defining functions
@@ -39,13 +41,13 @@ app.use(ipfilter(denied_ip, { mode: 'deny' }));
 
 module.exports = app;
 
-app.use(favicon(path.join(__dirname,'views','favicon.ico')));
+app.use(favicon(path.join(__dirname, 'views', 'favicon.ico')));
 
 // Assign route
-app.use('/', (req, res) => {
-    let joke_number = getRandomInt(10);
+app.get('/', (req, res) => {
+    const joke_number = Math.floor(Math.random() * 10);
     data["joke"] = jokes[joke_number];
-    res.render('/app/views/index.pug', data);
+    res.render('index.pug', data);
 });
 
 // Error handler
@@ -58,6 +60,7 @@ app.use(function(err, req, res, _next) {
 });
 
 // Start server
-app.listen(80, () => {
-    console.log('App listening on port 80');
+const PORT = process.env.PORT || 80;
+app.listen(PORT, () => {
+    console.log(`App listening on port ${PORT}`);
 });
